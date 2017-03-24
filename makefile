@@ -1,3 +1,3 @@
-strassen:
-	cp strassen.py strassen
-	chmod a+x strassen
+strassen2:
+	cp strassen2.py strassen2
+	chmod a+x strassen2

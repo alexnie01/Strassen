@@ -1,70 +1,87 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 """
 Created on Fri Mar 24 00:58:11 2017
 
 @author: anie
 """
 
-dimension = 10
 import math
 import time
 import numpy as np
 import random
 import sys
 
+""" 
+Parameters and inputs
+"""
+"""
+Taking in inputs
+
+./strassen 0 dimension inputfile
+python strassen.py arg1 arg2 arg3
+"""
+# switchover dimension for Strassen to classical matrix multiplication
+cutoff = 31
+
 """
 Generate Matrix
-
-Was used for testing purposes originally, kept commented for reference
 """
 
 def gen_mat(dim, filename = 'temp'):
      """ generate two random matrices for testing """
      mat_1 = np.random.randint(0,2,size=(dim,dim))
      mat_2 = np.random.randint(0,2,size=(dim,dim))
+#     sys.stdout.write(str(mat_1))
+#     sys.stdout.write(str(mat_2))
     
-     # reshape and save to test text file
+     # reshape and save to test text file in flat format desired by assignment
      writ_1 = mat_1.flatten()
      writ_2 = mat_2.flatten()
+     # open in write mode: clear previous contents, but append as needed
      save_file = open(filename+'.txt', 'w')
      np.savetxt(save_file, writ_1, fmt = '%i')
      np.savetxt(save_file, writ_2, fmt = '%i')
      save_file.close()
      
      return mat_1, mat_2
-#
-#"""
-#Taking in inputs
-#"""
-#"""
-#./strassen 0 dimension inputfile
-#python strassen.py arg1 arg2 arg3
-#"""
-#cutoff = 31
-#dimension = int(sys.argv[2])
-#inputfile = sys.argv[3]
-#
-#f = open(inputfile)
-#file_numbers = [int(line.strip()) for line in f.readlines()]
-#
-#matrix_1_list = file_numbers[:dimension**2]
-#matrix_1 = np.array(matrix_1_list).reshape(dimension,dimension)
-#matrix_2_list = file_numbers[dimension**2:]
-#matrix_2 = np.array(matrix_2_list).reshape(dimension,dimension)
-#
-#
-#
-#def multiply_matrices_standard(matrix_1, matrix_2, dimension):
-#    matrix = []
-#    for i in range(0, dimension):
-#        matrix_row = []
-#        for k in range(0, dimension):
-#            sum_j = 0
-#            for j in range(0, dimension):
-#                sum_j = sum_j + matrix_1[i][j]*matrix_2[j][k]
-#            matrix_row.append(sum_j)
-#        matrix.append(matrix_row)
-#    return matrix
+
+def test():
+    dim = 10
+    mat_1, mat_2 = gen_mat(10)
+    return (dim,'temp.txt')
+def main():
+    # dimension of matrices to multiply
+    dim = int(sys.argv[2])
+    # read in matrices single digit per line
+    inputfile = sys.argv[3]
+    return dim,inputfile
+    
+if __name__ == "__main__":
+    dim, inputfile = test()
+    f = open(inputfile)
+    #file_numbers = [int(line.strip()) for line in f.readlines()]
+    #matrix_1_list = file_numbers[:dim**2]
+    #matrix_1 = np.array(matrix_1_list).reshape(dim, dim)
+    #matrix_2_list = file_numbers[dim**2:]
+    #matrix_2 = np.array(matrix_2_list).reshape(dim,dim)
+    data = np.loadtxt(inputfile, dtype = int)
+    f.close()
+    mat_1 = data[:dim**2].reshape(dim,dim)
+    mat_2 = data[dim**2:].reshape(dim,dim)
+#    sys.stdout.write(str(mat_1))
+#    sys.stdout.write(str(mat_2))
+        
+def multiply_matrices_standard(matrix_1, matrix_2, dimension):
+    matrix = []
+    for i in range(0, dimension):
+        matrix_row = []
+        for k in range(0, dimension):
+            sum_j = 0
+            for j in range(0, dimension):
+                sum_j = sum_j + matrix_1[i][j]*matrix_2[j][k]
+            matrix_row.append(sum_j)
+        matrix.append(matrix_row)
+    return matrix
 #            
 #
 #
