@@ -70,6 +70,49 @@ def std_matmult(mat_1, mat_2, dim):
             prod_mat[i,k] = sum_j 
     return prod_mat
     
+def str_matmult(mat_1, mat_2, dim):
+    if dim <= cutoff:
+        return std_matmult(mat_1, mat_2, dim)
+    else:
+        if dim%2==1:
+            # pad bottom and right with one line of zeros
+            mat_10 = np.hstack(np.vstack((mat_1, np.zeros((1, dim), dtype=int))), 
+                              np.zeros((1,dim+1), dtype=int))
+            mat_20 = np.hstack(np.vstack((mat_2, np.zeros((1, dim), dtype=int))), 
+                              np.zeros((1,dim+1), dtype=int))
+            return str_matmult(mat_10, mat_20, dim+1)[:-1, :-1]
+        else:
+            half = dim/2
+            # blocks of first matrix
+            a11 = mat_1[:half, :half]
+            a12 = mat_1[:half, half:]
+            a21 = mat_1[half:, :half]
+            a22 = mat_1[half:, half:]
+            
+            # blocks of second matrix
+            b11 = mat_2[:half, :half]
+            b12 = mat_2[:half, half:]
+            b21 = mat_2[half:, :half]
+            b22 = mat_2[half:, half:]
+            
+            # strassen intermediates
+            p1 = str_matmult(add_mat(a11,a22), add_mat(b11,b22))
+            p2 = str_matmult(add_mat(a21, a22), b11)
+            p3 = str_matmult(a11, add_mat(b12,-b22))
+            p4 = str_matmult(a22, add_mat(b21, -b11))
+            p5 = str_matmult(add_mat(a11, a12), b22)
+            p6 = str_matmult(add_mat(a21, -a11), add_mat(b11, b12))
+            p7 = str_matmult(add_mat(a12, -a22), add_mat(b21, b22))
+            
+            # product subblocks
+            c11 = add_mat(add_mat(add_mat(p1, p4), -p5), p7)
+            c12 = add_mat(p3, p5)
+            c21 = add_mat(p2, p4)
+            c22 = add_mat(add_mat(add_mat(p1, -p2), p3), p6)
+            
+            # combine into product matrix
+            return np.vstack((np.hstack((c11,c12)), np.hstack((c21,c22))))
+            
 if __name__ == "__main__":
     dim, inputfile = test()
     f = open(inputfile)
@@ -92,22 +135,8 @@ if __name__ == "__main__":
 #def matrix_subtraction(matrix_1, matrix_2, dimension):
 #    matrix = [[matrix_1[i][j] - matrix_2[i][j] for j in range(dimension)] for i in range(dimension)]
 #    return np.array(matrix).reshape(dimension, dimension)
-#
-#def pad_zeros(matrix, dimensions_to_pad):
-#    """ pads to next power of two """
-#    zeros = np.matrix([np.zeros(len(matrix)) for i in range(0, dimensions_to_pad)])
-#    matrix = np.vstack((matrix, zeros))
-#    zeros = np.matrix([np.zeros(len(matrix)) for i in range(0, dimensions_to_pad)]).T
-#    matrix = np.hstack((matrix, zeros))
-#    return np.array(matrix).reshape(len(matrix), len(matrix))
-#
-#
-#def remove_zeros(multiplied_padded, dimensions_to_remove):
-#    """ removes padding to original dimension
-#        must pass in number of dimensions to remove """
-#    new_dimension = len(multiplied_padded)-dimensions_to_remove
-#    return np.array(multiplied_padded).reshape(len(multiplied_padded), len(multiplied_padded))[0:new_dimension, 0:new_dimension]
-#
+
+
 #
 ## #### Strassens
 #
