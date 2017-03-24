@@ -10,6 +10,7 @@ import time
 import numpy as np
 import random
 import sys
+import pdb
 
 """ 
 Parameters and inputs
@@ -56,36 +57,32 @@ def main():
     inputfile = sys.argv[3]
     return dim,inputfile
     
+def std_matmult(mat_1, mat_2, dim):
+    """ standard matrix multiplication """
+    # container for product matrix
+    prod_mat = np.zeros((dim,dim), dtype = int)
+    for i in np.arange(dim):
+        for k in np.arange(dim):
+            # running sum of components for (i,k) index in product matrix
+            sum_j = 0
+            for j in np.arange(dim):
+                sum_j += mat_1[i,j] * mat_2[j,k]
+            prod_mat[i,k] = sum_j 
+    return prod_mat
+    
 if __name__ == "__main__":
     dim, inputfile = test()
     f = open(inputfile)
-    #file_numbers = [int(line.strip()) for line in f.readlines()]
-    #matrix_1_list = file_numbers[:dim**2]
-    #matrix_1 = np.array(matrix_1_list).reshape(dim, dim)
-    #matrix_2_list = file_numbers[dim**2:]
-    #matrix_2 = np.array(matrix_2_list).reshape(dim,dim)
     data = np.loadtxt(inputfile, dtype = int)
     f.close()
     mat_1 = data[:dim**2].reshape(dim,dim)
     mat_2 = data[dim**2:].reshape(dim,dim)
 #    sys.stdout.write(str(mat_1))
 #    sys.stdout.write(str(mat_2))
-        
-def multiply_matrices_standard(matrix_1, matrix_2, dimension):
-    matrix = []
-    for i in range(0, dimension):
-        matrix_row = []
-        for k in range(0, dimension):
-            sum_j = 0
-            for j in range(0, dimension):
-                sum_j = sum_j + matrix_1[i][j]*matrix_2[j][k]
-            matrix_row.append(sum_j)
-        matrix.append(matrix_row)
-    return matrix
-#            
-#
-#
-## #### Straussen Helper Functions
+    
+    print np.dot(mat_1,mat_2)-std_matmult(mat_1,mat_2,dim)
+
+## #### Strassen Helper Functions
 #
 #def matrix_addition(matrix_1, matrix_2, dimension):
 #    matrix = [[matrix_1[i][j] + matrix_2[i][j] for j in range(dimension)] for i in range(dimension)]
