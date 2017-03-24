@@ -11,6 +11,7 @@ import numpy as np
 import random
 import sys
 import pdb
+import matplotlib.pyplot as plt
 
 """ 
 Parameters and inputs
@@ -22,10 +23,10 @@ Taking in inputs
 python strassen.py arg1 arg2 arg3
 """
 # switchover dimension for Strassen to classical matrix multiplication
-cutoff = 4
+# cutoff = 4
 
 # controls whether padding is done as needed at each step or all at once at start
-smart_pad = False
+smart_pad = True
 
 """
 Generate Matrix
@@ -42,23 +43,12 @@ def gen_mat(dim, filename = 'temp'):
      writ_1 = mat_1.flatten()
      writ_2 = mat_2.flatten()
      # open in write mode: clear previous contents, but append as needed
-     save_file = open(filename+'.txt', 'w')
+     save_file = file(filename+'.txt', 'w+')
      np.savetxt(save_file, writ_1, fmt = '%i')
      np.savetxt(save_file, writ_2, fmt = '%i')
      save_file.close()
      
      return mat_1, mat_2
-
-def test():
-    dim = 10
-    mat_1, mat_2 = gen_mat(10)
-    return (dim,'temp.txt')
-def main():
-    # dimension of matrices to multiply
-    dim = int(sys.argv[2])
-    # read in matrices single digit per line
-    inputfile = sys.argv[3]
-    return dim,inputfile
     
 def std_matmult(mat_1, mat_2, dim):
     """ standard matrix multiplication """
@@ -108,7 +98,7 @@ def str_matmult(mat_1, mat_2, dim, cutoff):
                               np.zeros((dim+1,1), dtype=int)))
             mat_20 = np.hstack((np.vstack((mat_2, np.zeros((1, dim), dtype=int))), 
                               np.zeros((dim+1,1), dtype=int)))
-            return str_matmult(mat_10, mat_20, dim+1, cutoff)[:-1, :-1]
+            return str_matmult(mat_10, mat_20, dim+1, cutoff)[:dim, :dim]
         # use brute padding up to next power of two
         elif not smart_pad and np.log2(dim)%1 != 0:
             pad_dim = 2**(int(np.log2(dim))+1)
@@ -154,6 +144,19 @@ def str_matmult(mat_1, mat_2, dim, cutoff):
             # combine into product matrix
             return np.vstack((np.hstack((c11,c12)), np.hstack((c21,c22))))
             
+def test():
+    """ function for testing """
+    dim = 512
+    mat_1, mat_2 = gen_mat(dim)
+    print "finished writing"
+    return (dim,'temp.txt')
+def main():
+    """ actual functionality for submission """
+    # dimension of matrices to multiply
+    dim = int(sys.argv[2])
+    # read in matrices single digit per line
+    inputfile = sys.argv[3]
+    return dim,inputfile
 if __name__ == "__main__":
     dim, inputfile = test()
     f = open(inputfile)
@@ -163,10 +166,17 @@ if __name__ == "__main__":
     mat_2 = data[dim**2:].reshape(dim,dim)
 #    sys.stdout.write(str(mat_1))
 #    sys.stdout.write(str(mat_2))
+    times = np.array([])
+    cutoffs = np.arange(5,30)
+    for cutoff in cutoffs:
+        print "running batch for cutoff " + str(cutoff)
+        init = time.clock()
+        str_matmult(mat_1, mat_2, dim, cutoff)
+        end = time.clock()
+        times = np.append(times, end-init)
+    plt.plot(cutoffs, times)
+    
 
-
-#
-#
 ## # ### Testing
 ## matrix_1, matrix_2 = generate_matrix(dimension)
 ## print matrix_1
@@ -183,19 +193,3 @@ if __name__ == "__main__":
 ## ## Timings for Strassen's 
 ## end = time.clock()
 ## print end - start
-#
-#
-## ## Standard Matrix for timings
-## start = time.clock()
-## standard = np.matrix(multiply_matrices_standard(matrix_1, matrix_2, len(matrix_2)))
-## print standard
-## end = time.clock()
-## print end - start
-#
-#
-## ## Original Testing
-## matrix_np = np.matmul(matrix_1, matrix_2)
-## assert standard.any() == straussens.any()
-## assert np.matrix(matrix_addition(matrix_1, matrix_2, len(matrix_2))).all() == np.add(matrix_1, matrix_2).all()
-## assert np.matrix(matrix_subtraction(matrix_1, matrix_2, len(matrix_2))).all() == np.subtract(matrix_1, matrix_2).all()
-#
