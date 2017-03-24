@@ -24,6 +24,9 @@ python strassen.py arg1 arg2 arg3
 # switchover dimension for Strassen to classical matrix multiplication
 cutoff = 4
 
+# controls whether padding is done as needed at each step or all at once at start
+smart_pad = False
+
 """
 Generate Matrix
 """
@@ -98,13 +101,24 @@ def str_matmult(mat_1, mat_2, dim, cutoff):
     if dim <= cutoff:
         return std_matmult(mat_1, mat_2, dim)
     else:
-        if dim%2==1:
+        # use smart padding only on odd dimensions
+        if smart_pad and dim%2==1:
             # pad bottom and right with one line of zeros
             mat_10 = np.hstack((np.vstack((mat_1, np.zeros((1, dim), dtype=int))), 
                               np.zeros((dim+1,1), dtype=int)))
             mat_20 = np.hstack((np.vstack((mat_2, np.zeros((1, dim), dtype=int))), 
                               np.zeros((dim+1,1), dtype=int)))
             return str_matmult(mat_10, mat_20, dim+1, cutoff)[:-1, :-1]
+        # use brute padding up to next power of two
+        elif not smart_pad and np.log2(dim)%1 != 0:
+            pad_dim = 2**(int(np.log2(dim))+1)
+            mat_10 = np.hstack((np.vstack((mat_1,
+                                np.zeros((pad_dim-dim, dim), dtype=int))), 
+                                np.zeros((pad_dim, pad_dim-dim), dtype=int)))
+            mat_20 = np.hstack((np.vstack((mat_2, 
+                                  np.zeros((pad_dim-dim, dim), dtype=int))),
+                                  np.zeros((pad_dim, pad_dim-dim), dtype=int)))                     
+            return str_matmult(mat_10,mat_20, pad_dim,cutoff)[:dim, :dim]
         else:
             half = dim/2
             # blocks of first matrix
@@ -150,18 +164,6 @@ if __name__ == "__main__":
 #    sys.stdout.write(str(mat_1))
 #    sys.stdout.write(str(mat_2))
 
-#
-#    # deal with it if it's not a power of two
-#    is_power_two = True
-#    dimension_difference = 0
-#    closest_power_of_two = math.log(dimension,2)
-#    if math.log(dimension, 2).is_integer() == False:
-#        closest_power_of_two = 2**(int(math.log(dimension,2)) + 1)
-#        dimension_difference = closest_power_of_two - dimension
-#        # pad matrix with zeros as needed
-#        matrix_1 = pad_zeros(matrix_1, dimension_difference)
-#        matrix_2 = pad_zeros(matrix_2, dimension_difference)
-#        dimension = closest_power_of_two
 
 #
 #
